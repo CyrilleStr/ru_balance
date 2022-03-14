@@ -1,28 +1,62 @@
 <h1>Ru balance</h1>
 
 {% if error_message %}
-    <p><strong>{{error_message}}</strong></p>    
+    <p style="color: red;"><strong>{{error_message}}</strong></p>    
 {% endif %}
 {% if success_message %}
-    <p><strong>{{success_message}}</strong></p>    
+    <p style="color: green;"><strong>{{success_message}}</strong></p>    
 {% endif %}
 
-<h3>Utilisateurs</h3>
-{% if users %}
+<fieldset>
+    <legend><h3>Rats</h3></legend>
+    {% if users %}
     <ul>
         {% for user in users %}
         <li>{{ user.name }}</li>
         {% endfor %}
     </ul>
-{% else %}
-    <p>Aucun utilisateur pour le moment</p>
-{% endif %}
+    {% else %}
+    <p>Aucun rat pour le moment</p>
+    {% endif %}
+    
+    <h4>Ajouter un nouveau rat</h4>
+    <form action="{% url 'main:add_user' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Nom du nouveau rat">
+        <input type="submit" value="Ajouter">
+    </form>
+</fieldset>
 
-<form action="{% url 'main:add_user' %}" method="post">
-    {% csrf_token %}
-    <input type="text" name="name" placeholder="Ajouter un utilisateur">
-    <input type="submit" value="submit">
-</form>
+<fieldset>
+    <legend><h3>Relations</h3></legend>
+    {% if relations %}
+        <ul>
+            {% for relation in relations %}
+            <li>{{ user.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aucune relation pour le moment</p>
+    {% endif %}
 
-<form action="{% url 'main:add_relation' %}" method="post">
-</form>
+    {% if users %}
+        <h4>Ajouter une nouvelle relation entre deux rats</h4>
+        <form action="{% url 'main:add_relation' %}" method="post">
+            {% csrf_token %}
+            <select name="borrower">
+                {% for user in users %}
+                    <option value="{{ user.name }}">{{ user.name }}</option>
+                {% endfor %}
+            </select>
+            <->
+            <select name="creditor">
+                {% for user in users %}
+                    <option value="{{ user.name }}">{{ user.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Relationner">
+        </form>
+    {% else %}
+        <h4>Pour ajouter une nouvelle relation, veuillez ajouter des nouveaux rats</h4>
+    {% endif %}
+</fieldset>

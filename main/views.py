@@ -1,8 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.http import HttpResponseRedirect
+from django.conf import settings
 
-from .models import User
+from .models import User, BlockChain, Block
+
+# Unique view
 
 
 class IndexView(generic.TemplateView):
@@ -13,6 +16,8 @@ class IndexView(generic.TemplateView):
         context['users'] = User.objects.all()
         return context
 
+# New user form route
+
 
 def addUser(request):
     newName = request.POST['name']
@@ -20,7 +25,7 @@ def addUser(request):
     if User.objects.filter(name=newName).exists():
         return render(request, 'main/index.html', {
             'users': User.objects.all(),
-            'error_message': "Un utilisateur avec ce nom existe déjà"
+            'error_message': "Un rat avec ce blaze existe déjà zebi..."
         })
     else:
         newUser = User()
@@ -28,9 +33,35 @@ def addUser(request):
         newUser.save()
         return render(request, 'main/index.html', {
             'users': User.objects.all(),
-            'success_message': "Utilisateur bien ajouté"
+            'success_message': "Rat bien ajouté amdulila !"
         })
+
+# New relation form route
+# Adding a new relation <=> creating a 0-amount block with the 2 users
 
 
 def addRelation(request):
-    return None
+    rat1 = get_object_or_404(User, name=request.POST['borrower'])
+    rat2 = get_object_or_404(User, name=request.POST['creditor'])
+    if rat1 == rat2:
+        return render(request, 'main/index.html', {
+            'users': User.objects.all(),
+            'error_message': "T'as des dettes envers toi-même enculé ?"
+        })
+    else:
+        BlockChain.addBlock(Block().createBlock(0, rat1, rat2))
+        return render(request, 'main/index.html', {
+            'users': User.objects.all(),
+            'success_message': "Relation bien ajouté ! (le crous en sueur)"
+        })
+
+
+if settings.DEBUG:
+    def createGenesisBlockView(request):
+        bc = BlockChain()
+        bc.createGenesisBlock()
+        bc.save()
+        return render(request, 'main/index.html', {
+            'users': User.objects.all(),
+            'success_message': "Blockchain initialisée"
+        })

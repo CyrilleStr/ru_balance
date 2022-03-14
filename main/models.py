@@ -1,44 +1,57 @@
 from django.db import models
 import hashlib
 import datetime
+import pickle
+
 
 class User(models.Model):
     name = models.CharField(max_length=255)
 
+
 class Block(models.Model):
-    hash = models.CharField(primary_key=True,max_length=255)
-    amount  = models.IntegerField()
+    hash = models.CharField(primary_key=True, max_length=255)
+    amount = models.IntegerField()
     creditor = models.ForeignKey(User, on_delete=models.CASCADE)
-    borrower = models.ForeignKey(User, on_delete=models.CASCADE,related_name="borrower")
+    borrower = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="borrower")
     date = models.DateTimeField()
     previousId = models.CharField(max_length=255)
 
-    # def __init__(self):
-        # self.amount = amount
-        # self.date = date
-        # self.previousId = previousId
+    def createBlock(self, amount: float, creditor: User, borrower: User):
+        self.amount = amount
+        self.date = datetime.datetime.now()
+        self.creditor = creditor
+        self.borrower = borrower
+        return self
 
-    def calculateHash():
-        self.hash = hashlib.sha256(amount + date + previousID + str(creditor) + str(borrower))
+    def calculateHash(self):
+        # picles.dumps() convert object to bytes
+        self.hash = hashlib.sha256(
+            bytes(self.amount) + pickle.dumps(self.date) + bytes(self.previousId) + pickle.dumps(self.creditor) + pickle.dumps(self.borrower))
+
 
 class BlockChain(models.Model):
     genesisBlock = models.ForeignKey(Block, on_delete=models.CASCADE)
-    latestBlock = models.ForeignKey(Block, on_delete=models.CASCADE,related_name="latestBlock")
+    latestBlock = models.ForeignKey(
+        Block, on_delete=models.CASCADE, related_name="latestBlock")
 
-    def createGenesisBlock():
-        self.chain = Block()
-        block.amount = 0
-        block.date = datetime.datetime.now()
+    def createGenesisBlock(self):
+        genesisUser = User()
+        genesisUser.name = "Larchuma"
+        genesisUser.save()
+        block = Block()
+        block.createBlock(0, genesisUser, genesisUser)
         block.previousId = 0
-        block.creditor = None
-        block.borrower = None
-        block.calculatedHash()
+        block.calculateHash()
+        block.save()
+        genesisBlock = Block.objects.get(previousId=0)
+        latestBlock = Block.objects.get(previousId=0)
 
-
-    def getlatestBlock():
+    def getlatestBlock(self):
         return latestBlock
 
-    def addBlock(newBlock):
-        newBlock.previousId = self.getLatestBlock().hash;
-        newBlock.calculateHash();
+    def addBlock(self, newBlock: Block):
+        newBlock.previousId = self.getLatestBlock().hash
+        newBlock.calculateHash()
         self.latestBock = newBlock
+        newBlock.save()
