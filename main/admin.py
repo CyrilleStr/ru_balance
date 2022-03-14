@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import User, Block, BlockChain
+
+admin.site.register(User)
+admin.site.register(Block)
+admin.site.register(BlockChain)
