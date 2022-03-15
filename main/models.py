@@ -27,7 +27,7 @@ class Block(models.Model):
     def calculateHash(self):
         # picles.dumps() convert object to bytes
         self.hash = hashlib.sha256(
-            bytes(self.amount) + pickle.dumps(self.date) + bytes(self.previousId) + pickle.dumps(self.creditor) + pickle.dumps(self.borrower))
+            str(self.amount).encode('utf-8') + str(self.date).encode('utf-8') + str(self.previousId).encode('utf-8') + str(self.creditor).encode('utf-8') + str(self.borrower).encode('utf-8'))
 
 
 class BlockChain(models.Model):
@@ -44,14 +44,14 @@ class BlockChain(models.Model):
         block.previousId = 0
         block.calculateHash()
         block.save()
-        genesisBlock = Block.objects.get(previousId=0)
-        latestBlock = Block.objects.get(previousId=0)
+        self.genesisBlock = Block.objects.get(previousId=0)
+        self.latestBlock = Block.objects.get(previousId=0)
 
     def getlatestBlock(self):
         return latestBlock
 
     def addBlock(self, newBlock: Block):
-        newBlock.previousId = self.getLatestBlock().hash
+        newBlock.previousId = self.latestBlock.hash
         newBlock.calculateHash()
         self.latestBock = newBlock
         newBlock.save()

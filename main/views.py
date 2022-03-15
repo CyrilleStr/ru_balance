@@ -13,7 +13,7 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all()
+        context['users'] = User.objects.all().exclude(name="Larchuma")
         return context
 
 # New user form route
@@ -24,7 +24,7 @@ def addUser(request):
 
     if User.objects.filter(name=newName).exists():
         return render(request, 'main/index.html', {
-            'users': User.objects.all(),
+            'users': User.objects.all().exclude(name="Larchuma"),
             'error_message': "Un rat avec ce blaze existe déjà zebi..."
         })
     else:
@@ -32,7 +32,7 @@ def addUser(request):
         newUser.name = newName
         newUser.save()
         return render(request, 'main/index.html', {
-            'users': User.objects.all(),
+            'users': User.objects.all().exclude(name="Larchuma"),
             'success_message': "Rat bien ajouté amdulila !"
         })
 
@@ -45,23 +45,31 @@ def addRelation(request):
     rat2 = get_object_or_404(User, name=request.POST['creditor'])
     if rat1 == rat2:
         return render(request, 'main/index.html', {
-            'users': User.objects.all(),
+            'users': User.objects.all().exclude(name="Larchuma"),
             'error_message': "T'as des dettes envers toi-même enculé ?"
         })
     else:
-        BlockChain.addBlock(Block().createBlock(0, rat1, rat2))
+        bc = BlockChain.objects.all()
+        bc[0].addBlock(Block().createBlock(0, rat1, rat2))
         return render(request, 'main/index.html', {
-            'users': User.objects.all(),
+            'users': User.objects.all().exclude(name="Larchuma"),
             'success_message': "Relation bien ajouté ! (le crous en sueur)"
         })
 
+# Create the first block linked to the user "Larchuma"
 
-if settings.DEBUG:
-    def createGenesisBlockView(request):
+
+def createGenesisBlockView(request):
+    if BlockChain.objects.all():
+        return render(request, 'main/index.html', {
+            'users': User.objects.all().exclude(name="Larchuma"),
+            'error_message': "Y'a déjà une blockchain"
+        })
+    else:
         bc = BlockChain()
         bc.createGenesisBlock()
         bc.save()
         return render(request, 'main/index.html', {
-            'users': User.objects.all(),
+            'users': User.objects.all().exclude(name="Larchuma"),
             'success_message': "Blockchain initialisée"
         })
