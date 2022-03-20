@@ -14,6 +14,8 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.all().exclude(name="Larchuma")
+        context['blocks'] = BlockChain.getAllBlocks()
+        context['relations'] = BlockChain.getAllRelation(context['blocks'])
         return context
 
 # New user form route
@@ -49,8 +51,7 @@ def addRelation(request):
             'error_message': "T'as des dettes envers toi-même enculé ?"
         })
     else:
-        bc = BlockChain.objects.all()
-        bc[0].addBlock(Block().createBlock(0, rat1, rat2))
+        BlockChain.addBlock(Block().createBlock(0, rat1, rat2))
         return render(request, 'main/index.html', {
             'users': User.objects.all().exclude(name="Larchuma"),
             'success_message': "Relation bien ajouté ! (le crous en sueur)"
@@ -60,15 +61,13 @@ def addRelation(request):
 
 
 def createGenesisBlockView(request):
-    if BlockChain.objects.all():
+    if Block.objects.all():
         return render(request, 'main/index.html', {
             'users': User.objects.all().exclude(name="Larchuma"),
             'error_message': "Y'a déjà une blockchain"
         })
     else:
-        bc = BlockChain()
-        bc.createGenesisBlock()
-        bc.save()
+        BlockChain.createGenesisBlock()
         return render(request, 'main/index.html', {
             'users': User.objects.all().exclude(name="Larchuma"),
             'success_message': "Blockchain initialisée"

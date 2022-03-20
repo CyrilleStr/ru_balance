@@ -1,4 +1,4 @@
-<h1>Ru balance</h1>
+<h1><a href="{% url 'main:index' %}">Ru balance</a></h1>
 
 {% if error_message %}
     <p style="color: red;"><strong>{{error_message}}</strong></p>    
@@ -32,7 +32,19 @@
     {% if relations %}
         <ul>
             {% for relation in relations %}
-            <li>{{ user.name }}</li>
+            <li>{{ relation.borrower.name }} <-- {{ relation.balance }} --> {{ relation.creditor.name}}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aucune relation pour le moment</p>
+    {% endif %}
+
+    <h4>Tous les blocs</h4>
+
+    {% if blocks %}
+        <ul>
+            {% for block in blocks %}
+            <li>Brasseur de moula: {{ block.creditor.name }} | Gros rat: {{ block.borrower.name }} | Montant: {{ block.amount }}</li>
             {% endfor %}
         </ul>
     {% else %}

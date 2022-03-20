@@ -1,7 +1,8 @@
 from django.db import models
 import hashlib
 import datetime
-import pickle
+
+from array import *
 
 
 class User(models.Model):
@@ -25,17 +26,24 @@ class Block(models.Model):
         return self
 
     def calculateHash(self):
-        # picles.dumps() convert object to bytes
         self.hash = hashlib.sha256(
             str(self.amount).encode('utf-8') + str(self.date).encode('utf-8') + str(self.previousId).encode('utf-8') + str(self.creditor).encode('utf-8') + str(self.borrower).encode('utf-8'))
 
 
-class BlockChain(models.Model):
-    genesisBlock = models.ForeignKey(Block, on_delete=models.CASCADE)
-    latestBlock = models.ForeignKey(
-        Block, on_delete=models.CASCADE, related_name="latestBlock")
+class Relation():
+    creditor: User
+    borrower: User
+    balance: int
 
-    def createGenesisBlock(self):
+    def __init__(self, creditor, borrower, balance):
+        self.creditor = creditor
+        self.borrower = borrower
+        self.balance = balance
+
+
+class BlockChain(models.Model):
+
+    def createGenesisBlock():
         genesisUser = User()
         genesisUser.name = "Larchuma"
         genesisUser.save()
@@ -44,14 +52,35 @@ class BlockChain(models.Model):
         block.previousId = 0
         block.calculateHash()
         block.save()
-        self.genesisBlock = Block.objects.get(previousId=0)
-        self.latestBlock = Block.objects.get(previousId=0)
 
-    def getlatestBlock(self):
-        return latestBlock
-
-    def addBlock(self, newBlock: Block):
-        newBlock.previousId = self.latestBlock.hash
+    def addBlock(newBlock: Block):
+        newBlock.previousId = Block.objects.latest('date').hash
         newBlock.calculateHash()
-        self.latestBock = newBlock
         newBlock.save()
+
+    def getAllBlocks():
+        currentBlock = Block.objects.latest('date')
+        blocks = []
+        while currentBlock.previousId != "0":
+            blocks.append(currentBlock)
+            currentBlock = Block.objects.get(
+                hash=currentBlock.previousId)
+
+        return blocks
+
+    def getAllRelation(blocks=0):
+        if blocks == 0:
+            blocks = BlockChain.getAllBlocks()
+        blockExist = False
+        relations = []
+        for block in blocks:
+            blockExist = False
+            for relation in relations:
+                if (block.creditor == relation.creditor and block.borrower == relation.borrower) or (block.borrower == relation.creditor and block.creditor == relation.borrower):
+                    relation.balance += block.amount
+                    blockExist = True
+            if not blockExist:
+                relations.append(
+                    Relation(block.creditor, block.borrower, block.amount))
+
+        return relations
