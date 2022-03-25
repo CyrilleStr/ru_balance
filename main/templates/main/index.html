@@ -32,14 +32,14 @@
     {% if relations %}
         <ul>
             {% for relation in relations %}
-            <li>{{ relation.borrower.name }} <-- {{ relation.balance }} --> {{ relation.creditor.name}}</li>
+            <li>{{ relation.borrower.name }} <a href="{% url 'main:add_block' creditorName=relation.creditor.name borrowerName=relation.borrower.name amount=-1 %}">-1€<a/> doit {{ relation.balance }}€ à <a href="{% url 'main:add_block' relation.creditor.name relation.borrower.name 1 %}">+1€</a> {{ relation.creditor.name}}</li>
             {% endfor %}
         </ul>
     {% else %}
         <p>Aucune relation pour le moment</p>
     {% endif %}
 
-    <h4>Tous les blocs</h4>
+    {% comment %} <h4>Tous les blocs</h4>
 
     {% if blocks %}
         <ul>
@@ -49,7 +49,7 @@
         </ul>
     {% else %}
         <p>Aucune relation pour le moment</p>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
     {% if users %}
         <h4>Ajouter une nouvelle relation entre deux rats</h4>
