@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Block, BlockChain
+from .models import User, Relation
 
 admin.site.register(User)
-admin.site.register(Block)
-admin.site.register(BlockChain)
+admin.site.register(Relation)

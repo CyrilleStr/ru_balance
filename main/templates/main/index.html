@@ -1,74 +1,122 @@
-<h1><a href="{% url 'main:index' %}">Ru balance</a></h1>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'main/bootstrap.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'main/style.css' %}">
+
+<h1><a href="{% url 'main:index' %}" style="text-decoration:none">Tema la taille du rat</a></h1>
 
 {% if error_message %}
-    <p style="color: red;"><strong>{{error_message}}</strong></p>    
+
+<div id="alert_banner" class="alert alert-dismissible alert-primary">
+    <button id="close_btn" type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <strong>{{ error_message }}</strong>
+</div>
+
 {% endif %}
 {% if success_message %}
-    <p style="color: green;"><strong>{{success_message}}</strong></p>    
+<div id="alert_banner" class="alert alert-dismissible alert-success">
+    <button id="close_btn" type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <strong>{{ success_message }}</strong>
+</div>
 {% endif %}
 
-<fieldset>
-    <legend><h3>Rats</h3></legend>
-    {% if users %}
-    <ul>
-        {% for user in users %}
-        <li>{{ user.name }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>Aucun rat pour le moment</p>
-    {% endif %}
-    
-    <h4>Ajouter un nouveau rat</h4>
-    <form action="{% url 'main:add_user' %}" method="post">
-        {% csrf_token %}
-        <input type="text" name="name" placeholder="Nom du nouveau rat">
-        <input type="submit" value="Ajouter">
-    </form>
-</fieldset>
-
-<fieldset>
-    <legend><h3>Relations</h3></legend>
-    {% if relations %}
-        <ul>
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a id="detteTab" class="nav-link active" data-bs-toggle="tab" onclick="showDette()">Dettes</a>
+  </li>
+  <li class="nav-item">
+    <a id="ratTab" class="nav-link" data-bs-toggle="tab" onclick="showRat()">Rat</a>
+  </li>
+</ul>
+<div id="myTabContent" class="tab-content">
+  <div class="tab-pane fade active show" id="Dette">
+    <fieldset>
+        <legend><h3>Dettes</h3></legend>
+        {% if relations %}
+        <ul class="list-group">
             {% for relation in relations %}
-            <li>{{ relation.borrower.name }} <a href="{% url 'main:add_block' creditorName=relation.creditor.name borrowerName=relation.borrower.name amount=-1 %}">-1€<a/> doit {{ relation.balance }}€ à <a href="{% url 'main:add_block' relation.creditor.name relation.borrower.name 1 %}">+1€</a> {{ relation.creditor.name}}</li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <p> {{ relation.borrower.name }} doit <span class="badge bg-primary rounded-pill">{{ relation.balance|floatformat:2 }}€</span> à {{ relation.creditor.name}} </p>
+                <form action="{% url 'main:add_block' creditorName=relation.creditor.name borrowerName=relation.borrower.name %}" method="post" class="form-group">
+                    {% csrf_token %}
+                    <input type="submit" name="action" value="-" class="btn btn-secondary btn-sm">
+                    <input type="number" value="1" name="amount" step="0.1" class="form-control input-number">
+                    <input type="submit" name="action" value="+" class="btn btn-secondary btn-sm">
+                </form>
+                </li>
+                
             {% endfor %}
         </ul>
-    {% else %}
-        <p>Aucune relation pour le moment</p>
-    {% endif %}
-
-    {% comment %} <h4>Tous les blocs</h4>
-
-    {% if blocks %}
-        <ul>
-            {% for block in blocks %}
-            <li>Brasseur de moula: {{ block.creditor.name }} | Gros rat: {{ block.borrower.name }} | Montant: {{ block.amount }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Aucune relation pour le moment</p>
-    {% endif %} {% endcomment %}
-
-    {% if users %}
-        <h4>Ajouter une nouvelle relation entre deux rats</h4>
-        <form action="{% url 'main:add_relation' %}" method="post">
+        {% else %}
+            <p>Aucune relation pour le moment</p>
+        {% endif %}
+        
+        {% if users %}
+        <form action="{% url 'main:add_relation' %}" method="post" class="form-group new-relation-form">
             {% csrf_token %}
-            <select name="borrower">
+            <label for="exampleSelect1" class="form-label mt-4">Ajouter une nouvelle relation entre deux rats</label>
+            <select class="form-select" id="exampleSelect1" name="borrower">
                 {% for user in users %}
                     <option value="{{ user.name }}">{{ user.name }}</option>
                 {% endfor %}
             </select>
-            <->
-            <select name="creditor">
+            <select class="form-select" id="exampleSelect1" name="creditor">
                 {% for user in users %}
                     <option value="{{ user.name }}">{{ user.name }}</option>
                 {% endfor %}
             </select>
-            <input type="submit" value="Relationner">
+            <input type="submit" value="Relationner" class="btn btn-primary">
+            </form>
+            {% else %}
+            <h4>Pour ajouter une nouvelle relation, veuillez ajouter des nouveaux rats</h4>
+        {% endif %}
+    </fieldset>
+  </div>
+  <div class="tab-pane fade" id="User">
+    <fieldset>
+        <legend><h3>Rats</h3></legend>
+        
+        {% if users %}
+    
+        <ul class="list-group">
+            {% for user in users %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ user.name }}
+            </li>
+            {% endfor %}
+        </ul>
+    
+        {% else %}
+        <p>Aucun rat pour le moment</p>
+        {% endif %}
+    </br>
+        <h4>Ajouter un nouveau rat</h4>
+        <form action="{% url 'main:add_user' %}" method="post" class="form-group">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="Blaze du rat" class="form-control">
+            <input type="submit" value="Ajouter" class="btn btn-primar">
         </form>
-    {% else %}
-        <h4>Pour ajouter une nouvelle relation, veuillez ajouter des nouveaux rats</h4>
-    {% endif %}
-</fieldset>
+    </fieldset>
+</div>
+
+<script>
+var closeBtn = document.getElementById("close_btn")
+function closeBanner(){
+    document.getElementById("alert_banner").remove()
+}
+if(closeBtn){
+ closeBtn.addEventListener('click',closeBanner)
+}
+function showDette(){
+    document.getElementById("detteTab").className = "nav-link active"; 
+    document.getElementById("ratTab").className = "nav-link"; 
+    document.getElementById("Dette").className = "tab-pane fade active show"; 
+    document.getElementById("User").className = "tab-pane fade";
+}
+function showRat(){
+    document.getElementById("detteTab").className = "nav-link"; 
+    document.getElementById("ratTab").className = "nav-link active";
+    document.getElementById("Dette").className = "tab-pane fade";
+    document.getElementById("User").className = "tab-pane fade active show";
+}
+</script>

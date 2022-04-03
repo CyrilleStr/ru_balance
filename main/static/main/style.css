@@ -1,0 +1,32 @@
+body {
+    padding: 10px;
+}
+
+.list-group-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-number {
+    width: 90px;
+    height: min-content;
+}
+
+.btn-sm {
+    margin: 0px 20px 0px 20px;
+}
+
+.form-select {
+    width: 80%;
+    margin: 10px;
+}
+
+.new-relation-form {
+    flex-direction: column;
+}

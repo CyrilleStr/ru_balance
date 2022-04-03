@@ -8,8 +8,6 @@ urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
     path("adduser", views.addUser, name="add_user"),
     path("addrelation", views.addRelation, name="add_relation"),
-    path("creategenesisblock", views.createGenesisBlockView,
-         name="create_genesis_block"),
-    path("addblock/<str:creditorName>/<str:borrowerName>/<str:amount>/",
+    path("addblock/<str:creditorName>/<str:borrowerName>/",
          views.addBlock, name="add_block")
 ]
